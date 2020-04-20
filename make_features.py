@@ -45,12 +45,18 @@ class Features:
                          "dat_present": False,
                          "that_present": False,
                          "also_present": False,  # see if there's something better
+                         "is_dutch": False
                          }
 
     def make_features(self, line):
         line = str(line)
         line = line.lower()
-        print(line)
+        lang = line[0:2]
+        line = line[3:]
+        if lang == "nl":
+            self.features["res"] = True
+        else:
+            self.features["res"] = False
         if line.find(" het ") != -1 or line.find(" de ") != -1:
             self.features["nl_art"] = True
         if is_dutch_preposition_is_not_english_word(line):
