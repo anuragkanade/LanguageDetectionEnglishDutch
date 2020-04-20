@@ -67,6 +67,8 @@ def information_gain(data_list):
     if not data_list:
         return
     for key in data_list[0].keys():
+        if key == "res" or key == "sent":
+            continue
         feat_pos, feat_neg = split_by_feat(data_list, key)
         a_prob = calculate_a_b_probability(data_list)
         entrop = entropy(a_prob)
@@ -91,41 +93,19 @@ def map_feat_index(data_list):
 
 def remove_feat(data_list, feat_name):
     for data in data_list:
-        data.remove(feat_name)
+        data.pop(feat_name)
 
     return data_list
 
 
 def make_decision_tree(data_list):
-    feat_list = []
+    feat_dict = {}
     # print(data_list)
-    feat_dict = map_feat_index(data_list)
     # print(feat_dict)
-    data_process(data_list, feat_list, feat_dict)
-    print(feat_list)
+    data_process(data_list, feat_dict, None)
+    print(feat_dict)
 
-    # print(calculate_a_b_counts(feat_pos), "True  - probability")
-    # print(calculate_a_b_counts(feat_neg), "False probability")
-    # feat_index = information_gain(feat_pos)
-    # feat_list.append(feat_dict[feat_index])
-    # feat_pos_2, feat_neg_2 = split_by_feat(feat_pos, feat_index)
-    # a_count, b_count = calculate_a_b_counts(feat_pos_2)
-    # print(a_count, b_count, "True - True", sep=" ")
-    # a_count, b_count = calculate_a_b_counts(feat_neg_2)
-    # print(a_count, b_count, "True - False", sep=" ")
-    # print(calculate_a_b_probability(feat_pos_2), "True - True", sep=" ")
-    # print(calculate_a_b_probability(feat_neg_2), "True - False", sep=" ")
-
-    # feat_index = information_gain(feat_neg)
-    # feat_list.append(feat_dict[feat_index])
-    # feat_pos_3, feat_neg_3 = split_by_feat(feat_neg, feat_index)
-    # a_count, b_count = calculate_a_b_counts(feat_pos_3)
-    # print(a_count, b_count, "False - True", sep=" ")
-    # a_count, b_count = calculate_a_b_counts(feat_neg_3)
-    # print(a_count, b_count, "False - False", sep=" ")
-    # print(calculate_a_b_probability(feat_pos_3), "False - True", sep=" ")
-    # print(calculate_a_b_probability(feat_neg_3), "False - False", sep=" ")
-    return feat_list
+    return feat_dict
 
 
 def get_new_dictionary(feat_dict, feat_index):
@@ -138,25 +118,45 @@ def get_new_dictionary(feat_dict, feat_index):
     return new_dict
 
 
-def data_process(data, feat_list, feat_dict):
+def data_process(data, feat_dict, parent_feat, branch_string="None"):
+    # Anfield case breaks stuff. No current attribute improves stuff in that case, as even the dutch wiki page has an
+    # english article
     feat_name = information_gain(data)
     if feat_name is None:
         return
-    feat_list.append(feat_name)
+    add_child(feat_dict, parent_feat, feat_name, branch_string, len(data))
     feat_pos, feat_neg = split_by_feat(data, feat_name)
     prob_pos = calculate_a_b_probability(feat_pos)
     prob_neg = calculate_a_b_probability(feat_neg)
     a_count, b_count = calculate_a_b_counts(feat_pos)
-    print(a_count, b_count, sep=" ")
+    print(feat_name, "True", a_count, b_count, sep=" ")
     a_count, b_count = calculate_a_b_counts(feat_neg)
-    print(a_count, b_count, sep=" ")
+    print(feat_name, "False", a_count, b_count, sep=" ")
     if prob_pos != 0 and prob_pos != 1:
         feat_pos = remove_feat(feat_pos, feat_name)
-        data_process(feat_pos, feat_list, feat_dict)
+        data_process(feat_pos, feat_dict, feat_name, "True")
+    elif prob_pos == 1:
+        add_child(feat_dict, feat_name, "True", "Leaf", "is_nl")
+        # True means is_nl
+    else:
+        add_child(feat_dict, feat_name, "True", "Leaf", "is_en")
+        # False means is_en
 
     if prob_neg != 0 and prob_neg != 1:
         feat_neg = remove_feat(feat_neg, feat_name)
-        data_process(feat_neg, feat_list, feat_dict)
+        data_process(feat_neg, feat_dict, feat_name, "False")
+    elif prob_neg == 1:
+        add_child(feat_dict, feat_name, "False", "Leaf", "is_nl")
+    else:
+        add_child(feat_dict, feat_name, "False", "Leaf", "is_en")
+
+
+def add_child(feat_list, parent_feat, child_feat, branch_string, length_data):
+    append_string = branch_string + "_" + child_feat + "_" + str(length_data)
+    if parent_feat not in feat_list.keys():
+        feat_list[parent_feat] = [append_string]
+    else:
+        feat_list[parent_feat].append(append_string)
 
 
 def main():

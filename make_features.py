@@ -35,9 +35,9 @@ class Features:
     __slots__ = "features"
 
     def __init__(self):
-        self.features = {"nl_art": False,
+        self.features = {"nl_article": False,
                          "nl_prepos": False,
-                         "en_art": False,
+                         "en_article": False,
                          "en_prepos": False,
                          "accent": False,
                          "als_present": False,
@@ -53,16 +53,17 @@ class Features:
         line = line.lower()
         lang = line[0:2]
         line = line[3:]
+        self.features["sent"] = line
         if lang == "nl":
             self.features["res"] = True
         else:
             self.features["res"] = False
         if line.find(" het ") != -1 or line.find(" de ") != -1:
-            self.features["nl_art"] = True
+            self.features["nl_article"] = True
         if is_dutch_preposition_is_not_english_word(line):
             self.features["nl_prepos"] = True
         if line.find(" the ") != -1 or line.find(" a ") != -1 or line.find(" an ") != -1:
-            self.features["en_art"] = True
+            self.features["en_article"] = True
         if is_english_preposition(line):
             self.features["en_prepos"] = True
         if is_it_dutch_accent(line):
