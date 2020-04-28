@@ -100,10 +100,7 @@ def remove_feat(data_list, feat_name):
 
 def make_decision_tree(data_list):
     feat_dict = {}
-    # print(data_list)
-    # print(feat_dict)
     data_process(data_list, feat_dict, None)
-    print(feat_dict)
 
     return feat_dict
 
@@ -128,10 +125,6 @@ def data_process(data, feat_dict, parent_feat, branch_string="None"):
     feat_pos, feat_neg = split_by_feat(data, feat_name)
     prob_pos = calculate_a_b_probability(feat_pos)
     prob_neg = calculate_a_b_probability(feat_neg)
-    a_count, b_count = calculate_a_b_counts(feat_pos)
-    print(feat_name, "True", a_count, b_count, sep=" ")
-    a_count, b_count = calculate_a_b_counts(feat_neg)
-    print(feat_name, "False", a_count, b_count, sep=" ")
     if prob_pos != 0 and prob_pos != 1:
         feat_pos = remove_feat(feat_pos, feat_name)
         data_process(feat_pos, feat_dict, feat_name, "True")
@@ -152,17 +145,9 @@ def data_process(data, feat_dict, parent_feat, branch_string="None"):
 
 
 def add_child(feat_list, parent_feat, child_feat, branch_string, length_data):
-    append_string = branch_string + "_" + child_feat + "_" + str(length_data)
+    append_string = child_feat
     if parent_feat not in feat_list.keys():
         feat_list[parent_feat] = [append_string]
     else:
         feat_list[parent_feat].append(append_string)
 
-
-def main():
-    data_list = file_reader("dtree-data.txt")
-    print(make_decision_tree(data_list))
-
-
-if __name__ == "__main__":
-    main()
