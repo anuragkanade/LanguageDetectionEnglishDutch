@@ -35,7 +35,7 @@ def calculate_probability(a_count, b_count):
 
 def calculate_a_b_probability(data_list):
     a_count, b_count = calculate_a_b_counts(data_list)
-    return a_count / (a_count + b_count)
+    return a_count / (a_count + b_count + np.finfo(float).eps)
 
 
 def file_reader(filename):
@@ -71,14 +71,19 @@ def information_gain(data_list):
             continue
         feat_pos, feat_neg = split_by_feat(data_list, key)
         a_prob = calculate_a_b_probability(data_list)
-        entrop = entropy(a_prob)
-        rem = remainder(feat_pos, feat_neg)
-        gain = entrop - rem
+        gain = calculate_gain(a_prob, feat_pos, feat_neg)
         gains.append(gain)
         if gain > max_gain:
             max_gain = gain
             first_feat = key
     return first_feat
+
+
+def calculate_gain(a_prob, feat_pos, feat_neg):
+    entrop = entropy(a_prob)
+    rem = remainder(feat_pos, feat_neg)
+    gain = entrop - rem
+    return gain
 
 
 def map_feat_index(data_list):
@@ -144,12 +149,12 @@ def data_process(data, feat_dict, parent_feat, branch_string="None"):
         add_child(feat_dict, feat_name, "False", "Leaf", "is_en")
 
 
-def add_child(feat_list, parent_feat, child_feat, branch_string, length_data):
+def add_child(feat_dict, parent_feat, child_feat, branch_string, final_outcome):
     append_string = child_feat
     if child_feat == "True" or child_feat == "False":
-        append_string += ":" + length_data
-    if parent_feat not in feat_list.keys():
-        feat_list[parent_feat] = [append_string]
+        append_string += ":" + final_outcome
+    if parent_feat not in feat_dict.keys():
+        feat_dict[parent_feat] = [append_string]
     else:
-        feat_list[parent_feat].append(append_string)
+        feat_dict[parent_feat].append(append_string)
 
