@@ -21,8 +21,11 @@ def training(file_name, hypothesis_out, learn_type):
             feature_value_mapping.append(features.features)
 
     if learn_type == "dt":
+        hypothesis_out = "dt" + hypothesis_out
         dictionary = dt.make_decision_tree(feature_value_mapping)
+        print(dictionary)
     elif learn_type == "ada":
+        hypothesis_out = "ada" + hypothesis_out
         dictionary = ada.make_stumps(feature_value_mapping)
 
     with open(hypothesis_out, "wb") as output_file:

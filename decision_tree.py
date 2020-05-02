@@ -2,6 +2,9 @@ import math
 import numpy as np
 
 
+MAX_DEPTH = math.inf
+
+
 def entropy(probability):
     q = 1 - probability
     return -(probability * math.log(probability + np.finfo(float).eps, 2) + q * math.log(q + np.finfo(float).eps, 2))
@@ -105,7 +108,7 @@ def remove_feat(data_list, feat_name):
 
 def make_decision_tree(data_list):
     feat_dict = {}
-    data_process(data_list, feat_dict, None)
+    data_process(data_list, feat_dict, None, MAX_DEPTH)
 
     return feat_dict
 
@@ -120,36 +123,47 @@ def get_new_dictionary(feat_dict, feat_index):
     return new_dict
 
 
-def data_process(data, feat_dict, parent_feat, branch_string="None"):
-    # Anfield case breaks stuff. No current attribute improves stuff in that case, as even the dutch wiki page has an
-    # english article
+def data_process(data, feat_dict, parent_feat, depth):
+    is_fin = None
     feat_name = information_gain(data)
     if feat_name is None:
         return
-    add_child(feat_dict, parent_feat, feat_name, branch_string, len(data))
+    if depth == 0:
+        return True
+    add_child(feat_dict, parent_feat, feat_name, len(data))
     feat_pos, feat_neg = split_by_feat(data, feat_name)
     prob_pos = calculate_a_b_probability(feat_pos)
     prob_neg = calculate_a_b_probability(feat_neg)
     if prob_pos != 0 and prob_pos != 1:
         feat_pos = remove_feat(feat_pos, feat_name)
-        data_process(feat_pos, feat_dict, feat_name, "True")
+        is_fin = data_process(feat_pos, feat_dict, feat_name, depth - 1)
+        if is_fin:
+            if prob_pos >= 0.5:
+                add_child(feat_dict, feat_name, "True", "is_nl")
+            else:
+                add_child(feat_dict, feat_name, "True", "is_en")
+
     elif prob_pos == 1:
-        add_child(feat_dict, feat_name, "True", "Leaf", "is_nl")
-        # True means is_nl
+        add_child(feat_dict, feat_name, "True", "is_nl")
     else:
-        add_child(feat_dict, feat_name, "True", "Leaf", "is_en")
-        # False means is_en
+        add_child(feat_dict, feat_name, "True", "is_en")
 
     if prob_neg != 0 and prob_neg != 1:
         feat_neg = remove_feat(feat_neg, feat_name)
-        data_process(feat_neg, feat_dict, feat_name, "False")
+        is_fin = data_process(feat_neg, feat_dict, feat_name, depth - 1)
+        if is_fin:
+            if prob_neg >= 0.5:
+                add_child(feat_dict, feat_name, "False", "is_nl")
+            else:
+                add_child(feat_dict, feat_name, "False", "is_en")
+
     elif prob_neg == 1:
-        add_child(feat_dict, feat_name, "False", "Leaf", "is_nl")
+        add_child(feat_dict, feat_name, "False", "is_nl")
     else:
-        add_child(feat_dict, feat_name, "False", "Leaf", "is_en")
+        add_child(feat_dict, feat_name, "False", "is_en")
 
 
-def add_child(feat_dict, parent_feat, child_feat, branch_string, final_outcome):
+def add_child(feat_dict, parent_feat, child_feat, final_outcome):
     append_string = child_feat
     if child_feat == "True" or child_feat == "False":
         append_string += ":" + final_outcome

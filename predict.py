@@ -39,10 +39,12 @@ def decision_tree_predicter(feature_value_mapping, dt_dict):
         while True:
             if key == "True:is_nl" or key == "False:is_nl" or key == "True:is_en" \
                     or key == "False:is_en":
-                key = dt_dict[key][0]
                 break
             else:
-                key = dt_dict[key][1]
+                if entry[key]:
+                    key = dt_dict[key][0]
+                else:
+                    key = dt_dict[key][1]
 
         results.append(key.split(":")[1])
     return results
