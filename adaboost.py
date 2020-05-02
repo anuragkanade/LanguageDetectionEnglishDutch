@@ -127,12 +127,36 @@ def get_new_stump_data(data_list, feat_name):
 
 
 def add_child(feat_dict, parent_feat, child_feat, final_outcome):
-    append_string = child_feat
+    append_string = ""
     if child_feat == "True" or child_feat == "False":
-        append_string += ":" + final_outcome
+        append_string = final_outcome
     if child_feat == "amount_of_say":
-        append_string += ":" + str(final_outcome)
+        append_string = final_outcome
     if parent_feat not in feat_dict.keys():
-        feat_dict[parent_feat] = [append_string]
+        feat_dict[parent_feat] = {child_feat: append_string}
     else:
-        feat_dict[parent_feat].append(append_string)
+        feat_dict[parent_feat][child_feat] = append_string
+
+
+def decide(decision_dict, row):
+    weight_is_nl = 0.0
+    weight_is_en = 0.0
+    for key in decision_dict:
+        if row[key]:
+            if decision_dict[key]["True"] == "is_nl":
+                weight_is_nl += decision_dict[key]["amount_of_say"]
+            elif decision_dict[key]["True"] == "is_en":
+                weight_is_en += decision_dict[key]["amount_of_say"]
+
+        else:
+            if decision_dict[key]["False"] == "is_nl":
+                weight_is_nl += decision_dict[key]["amount_of_say"]
+            elif decision_dict[key]["False"] == "is_en":
+                weight_is_en += decision_dict[key]["amount_of_say"]
+
+    if weight_is_nl > weight_is_en:
+        return_value = "is_nl"
+    else:
+        return_value = "is_en"
+
+    return return_value
