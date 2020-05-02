@@ -146,6 +146,8 @@ def data_process(data, feat_dict, parent_feat, branch_string="None"):
 
 def add_child(feat_list, parent_feat, child_feat, branch_string, length_data):
     append_string = child_feat
+    if child_feat == "True" or child_feat == "False":
+        append_string += ":" + length_data
     if parent_feat not in feat_list.keys():
         feat_list[parent_feat] = [append_string]
     else:

@@ -21,6 +21,7 @@ def training(file_name, hypothesis_out):
             feature_value_mapping.append(features.features)
 
     dictionary = dt.make_decision_tree(feature_value_mapping)
+    print(dictionary)
     with open(hypothesis_out, "wb") as output_file:
         pickle.dump(dictionary, output_file)
 
