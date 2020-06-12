@@ -5,9 +5,17 @@ import adaboost as ada
 
 
 def main():
+    """
+    runs the algorithm on test data using the model stored in file_name 'hypothesis' and prints out the results
+    tree with root = None is a decision tree and tree without None is an adaboost dictionary
+
+    first command line argument: file_name of file which has the serialized version of the model
+    second command line argument: file_name of file which has the test_data
+
+    :return: None
+    """
     hypothesis = sys.argv[1]
     test_data = sys.argv[2]
-    dt_dict = None
     with open(hypothesis, "rb") as dt:
         dt_dict = pickle.load(dt)
     feature_value_mapping = []
@@ -26,13 +34,27 @@ def main():
 
 
 def adaboost_predicter(dt_dict, feature_value_mapping):
+    """
+    Calls the adaboost predictor class
+
+    :param dt_dict: model in the form of a dictionary
+    :param feature_value_mapping: dictionary obtained from make_features
+    :return: results of the language classification of the data
+    """
     results = []
     for entry in feature_value_mapping:
         results.append(ada.decide(dt_dict, entry))
     return results
 
 
-def decision_tree_predicter(feature_value_mapping, dt_dict):
+def decision_tree_predicter(dt_dict, feature_value_mapping):
+    """
+    returns the results of the decision tree predictions
+
+    :param dt_dict: model in the form of a dictionary
+    :param feature_value_mapping: dictionary obtained from make_features
+    :return: results of the language classification of the data
+    """
     results = []
     for entry in feature_value_mapping:
         key = dt_dict[None][0]
