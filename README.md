@@ -26,3 +26,6 @@ The program automatically detects the type of model if it is generated using the
 For getting predictions using adaboost you would run:  
 python3 predict.py adaoutput.txt test.txt
 
+### Link
+https://github.com/anuragkanade/LanguageDetectionEnglishDutch/
+
